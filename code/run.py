@@ -13,7 +13,7 @@ from sprites import MazeSprites
 from mazedata import MazeData
 
 class GameController(object):
-    def __init__(self):
+    def __init__(self, training = False, render = True):
         pygame.init()
         self.screen = pygame.display.set_mode(SCREENSIZE, 0, 32)
         self.background = None
@@ -21,7 +21,6 @@ class GameController(object):
         self.background_flash = None
         self.clock = pygame.time.Clock()
         self.fruit = None
-        self.pause = Pause(True)
         self.level = 0
         self.lives = 5
         self.score = 0
@@ -33,6 +32,10 @@ class GameController(object):
         self.fruitCaptured = []
         self.fruitNode = None
         self.mazedata = MazeData()
+        self.over = False
+        self.training = training
+        self.render_game = render
+        self.pause = Pause(not self.training)
 
     def setBackground(self):
         self.background_norm = pygame.surface.Surface(SCREENSIZE).convert()
@@ -66,6 +69,12 @@ class GameController(object):
         self.ghosts.inky.startNode.denyAccess(RIGHT, self.ghosts.inky)
         self.ghosts.clyde.startNode.denyAccess(LEFT, self.ghosts.clyde)
         self.mazedata.obj.denyGhostsAccess(self.ghosts, self.nodes)
+
+        if not self.training:
+            self.textgroup.showText(READYTXT)
+        else:
+            self.pause.paused = False
+            self.showEntities()
 
     def startGame_old(self):      
         self.mazedata.loadMaze(self.level)#######
@@ -129,7 +138,8 @@ class GameController(object):
         if afterPauseMethod is not None:
             afterPauseMethod()
         self.checkEvents()
-        self.render()
+        if self.render_game:
+            self.render()
 
     def checkEvents(self):
         for event in pygame.event.get():
@@ -161,7 +171,10 @@ class GameController(object):
             if self.pellets.isEmpty():
                 self.flashBG = True
                 self.hideEntities()
-                self.pause.setPause(pauseTime=3, func=self.nextLevel)
+                if self.training:
+                    self.nextLevel()
+                else:
+                    self.pause.setPause(pauseTime=3, func=self.nextLevel)
 
     def checkGhostEvents(self):
         for ghost in self.ghosts:
@@ -183,9 +196,15 @@ class GameController(object):
                         self.ghosts.hide()
                         if self.lives <= 0:
                             self.textgroup.showText(GAMEOVERTXT)
-                            self.pause.setPause(pauseTime=3, func=self.restartGame)
+                            if self.training:
+                                self.over = True
+                            else:
+                                self.pause.setPause(pauseTime=3, func=self.restartGame)
                         else:
-                            self.pause.setPause(pauseTime=3, func=self.resetLevel)
+                            if self.training:
+                                self.resetLevel()
+                            else:
+                                self.pause.setPause(pauseTime=3, func=self.resetLevel)
     
     def checkFruitEvents(self):
         if self.pellets.numEaten == 50 or self.pellets.numEaten == 140:
@@ -218,25 +237,29 @@ class GameController(object):
     def nextLevel(self):
         self.showEntities()
         self.level += 1
-        self.pause.paused = True
+        if not self.training:
+            self.pause.paused = True
         self.startGame()
         self.textgroup.updateLevel(self.level)
 
     def restartGame(self):
         self.lives = 5
         self.level = 0
-        self.pause.paused = True
+        if not self.training:
+            self.pause.paused = True
         self.fruit = None
         self.startGame()
         self.score = 0
         self.textgroup.updateScore(self.score)
         self.textgroup.updateLevel(self.level)
-        self.textgroup.showText(READYTXT)
+        if not self.training:
+            self.textgroup.showText(READYTXT)
         self.lifesprites.resetLives(self.lives)
         self.fruitCaptured = []
 
     def resetLevel(self):
-        self.pause.paused = True
+        if not self.training:
+            self.pause.paused = True
         self.pacman.reset()
         self.ghosts.reset()
         self.fruit = None
