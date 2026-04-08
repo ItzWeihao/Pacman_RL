@@ -1,1 +1,1 @@
-# Pacman_RL
+# Pacman - Reinforced Learning via Q-Learning
