@@ -39,6 +39,10 @@ agent = Agent(
 agent.load()
 
 game = GameController(training=TRAINING, render=RENDER)
+
+if agent.total_iterations % 500 == 0:
+    agent.epsilon = 0.65
+
 game.startGame()
 
 if TRAINING:
