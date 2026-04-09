@@ -78,26 +78,38 @@ if TRAINING:
             else:
                 reward -= 1
 
-            #time_penalty += 1/60
-            #if time_penalty >= TIME_PENALTY_INTERVAL:
-            #    reward -= 1
-            #    time_penalty = 0
+            next_state = get_state(game.pacman, game.ghosts, game.pellets)
+            next_action = agent.get_action(next_state, game.pacman.validDirections())
 
             if game.pacman.overshotTarget():
-                next_state = get_state(game.pacman, game.ghosts, game.pellets)
-                next_action = agent.get_action(next_state, game.pacman.validDirections())
+                game.pacman.node = game.pacman.target
 
-                print(next_action)
+                if game.pacman.node.neighbors[PORTAL] is not None:
+                    game.pacman.node = game.pacman.node.neighbors[PORTAL]
+
+                game.pacman.target = game.pacman.getNewTarget(next_action)
+
+                if game.pacman.target is not game.pacman.node:
+                    game.pacman.direction = next_action
+                else:
+                    game.pacman.direction = STOP
+                    next_action = agent.get_action(next_state, game.pacman.validDirections())
+                    game.pacman.target = game.pacman.getNewTarget(next_action)
+
+                if game.pacman.target is game.pacman.node:
+                    game.pacman.direction = STOP
+                    next_action = agent.get_action(next_state, game.pacman.validDirections())
+
+                game.pacman.setPosition()
+
+                game.pacman.direction = next_action
 
                 agent.update(state, action, reward, next_state, game.pacman.validDirections())
-
-                game.pacman.target = game.pacman.node.neighbors[next_action]
-                game.pacman.direction = next_action
 
                 state = next_state
                 action = next_action
 
-            total_reward += reward
+                total_reward += reward
 
         print(f"   Total reward: {total_reward} /n")
         game.over = False
