@@ -6,6 +6,7 @@ from constants import *
 
 TRAINING = True
 RENDER = True
+TOTAL_REWARD_GAIN = 0
 
 def nearest_pellet_distance(pacman, pellets):
     if not pellets.pelletList:
@@ -43,9 +44,9 @@ game.startGame()
 if TRAINING:
     for episode in range(agent.nu):
         agent.epsilon = max(0.01, agent.epsilon * 0.995)
-        print(f"agent epsilon: {agent.epsilon}")
         agent.total_iterations += 1
-        print(f"Iteration {agent.total_iterations}")
+        print(f"======== Iteration {agent.total_iterations} ========")
+        print(f"* Agent Epsilon: {agent.epsilon}")
 
         state = get_state(game.pacman, game.ghosts, game.pellets)
         action = agent.get_action(state, [LEFT, RIGHT])
@@ -111,9 +112,11 @@ if TRAINING:
 
                 total_reward += reward
 
-        print(f"   Total reward: {total_reward} /n")
+        print(f"* Total reward: {total_reward} \n")
+        TOTAL_REWARD_GAIN += total_reward
         game.over = False
         game.restartGame()
+    print(f"* Reward Average for the past {agent.nu} iterations: {TOTAL_REWARD_GAIN / agent.nu} \n")
     agent.save()
 else:
     while not game.over:

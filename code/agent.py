@@ -39,6 +39,6 @@ class Agent:
             self.Q = defaultdict(float, data["Q"])
             self.total_iterations = data["total_iterations"]
             self.epsilon = data["epsilon"]
-            print(f"Resuming from iteration {self.total_iterations} with epsilon {self.epsilon}")
+            print(f"==== Resuming from iteration {self.total_iterations} with epsilon {self.epsilon} ====")
         except FileNotFoundError:
-            print(f"No save file found, starting fresh")
+            print(f"===== No save file found, starting fresh =====")
