@@ -31,10 +31,10 @@ def near_node(pacman, threshold=5):
 
 agent = Agent(
     name    = "Pacman",
-    epsilon = 0.65,
-    alpha   = 0.1,
-    gamma   = 0.9,
-    nu      = 1000
+    epsilon = 0.65,     # exploration rate (random percentage to take a random action)
+    alpha   = 0.1,      # learning rate (how fast it learns and nudges the q-value)
+    gamma   = 0.9,      # discount factor (higher = values future rewards | lower = values immediate rewards)
+    nu      = 100       # number of iterations
 )
 agent.load()
 
