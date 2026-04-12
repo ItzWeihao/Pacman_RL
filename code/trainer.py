@@ -34,21 +34,22 @@ agent = Agent(
     epsilon = 0.65,
     alpha   = 0.1,
     gamma   = 0.9,
-    nu      = 100
+    nu      = 1000
 )
 agent.load()
 
 game = GameController(training=TRAINING, render=RENDER)
 
-if agent.total_iterations % 500 == 0:
-    agent.epsilon = 0.65
-
 game.startGame()
 
 if TRAINING:
     for episode in range(agent.nu):
-        agent.epsilon = max(0.01, agent.epsilon * 0.995)
         agent.total_iterations += 1
+
+        if agent.total_iterations % 500 == 0:
+            agent.epsilon = 0.65
+
+        agent.epsilon = max(0.01, agent.epsilon * 0.995)
         print(f"======== Iteration {agent.total_iterations} ========")
         print(f"* Agent Epsilon: {agent.epsilon}")
 
