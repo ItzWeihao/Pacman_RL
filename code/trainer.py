@@ -8,6 +8,9 @@ TRAINING = True
 RENDER = True
 TOTAL_REWARD_GAIN = 0
 
+# 2300 iterations; -702,56 avg rewards
+# 2400 iterations; -688.52 avg reward
+
 def nearest_pellet_distance(pacman, pellets):
     if not pellets.pelletList:
         return 0
