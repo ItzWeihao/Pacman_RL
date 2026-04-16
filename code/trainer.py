@@ -49,8 +49,8 @@ if TRAINING:
     for episode in range(agent.nu):
         agent.total_iterations += 1
 
-        if agent.total_iterations % 500 == 0:
-            agent.epsilon = 0.65
+        #if agent.total_iterations % 500 == 0:
+        #    agent.epsilon = 0.65
 
         agent.epsilon = max(0.01, agent.epsilon * 0.995)
         print(f"======== Iteration {agent.total_iterations} ========")
