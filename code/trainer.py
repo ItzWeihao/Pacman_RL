@@ -66,6 +66,7 @@ if TRAINING:
         while not game.over:
             prev_score = game.score
             prev_lives = game.lives
+            prev_level = game.level
             prev_pellet_distance = nearest_pellet_distance(game.pacman, game.pellets)
             prev_ghost_distance = nearest_ghost_distance(game.pacman, game.ghosts)
 
@@ -78,6 +79,9 @@ if TRAINING:
 
             if game.lives < prev_lives:
                 reward -= 500
+
+            if game.level != prev_level:
+                reward += 1000
 
             if curr_ghost_distance < prev_ghost_distance:
                 reward -= 50
