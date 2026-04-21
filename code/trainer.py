@@ -88,8 +88,6 @@ if TRAINING:
 
             if curr_pellet_distance < prev_pellet_distance:
                 reward += 5
-            else:
-                reward -= 1
 
             next_state = get_state(game.pacman, game.ghosts, game.pellets)
             next_action = agent.get_action(next_state, game.pacman.validDirections())
