@@ -37,7 +37,7 @@ agent = Agent(
     epsilon = 0.65,     # exploration rate (random percentage to take a random action)
     alpha   = 0.1,      # learning rate (how fast it learns and nudges the q-value)
     gamma   = 0.9,      # discount factor (higher = values future rewards | lower = values immediate rewards)
-    nu      = 100       # number of iterations
+    nu      = 25       # number of iterations
 )
 agent.load()
 
@@ -52,6 +52,7 @@ if TRAINING:
         #if agent.total_iterations % 500 == 0:
         #    agent.epsilon = 0.65
 
+        #agent.epsilon = max(agent.epsilon, 0.2)
         agent.epsilon = max(0.01, agent.epsilon * 0.995)
         print(f"======== Iteration {agent.total_iterations} ========")
         print(f"* Agent Epsilon: {agent.epsilon}")
@@ -72,10 +73,23 @@ if TRAINING:
 
             game.update()
 
+            reward = game.score - prev_score
+
             curr_pellet_distance = nearest_pellet_distance(game.pacman, game.pellets)
             curr_ghost_distance = nearest_ghost_distance(game.pacman, game.ghosts)
 
-            reward = game.score - prev_score
+            power_pellet_eaten = prev_score + 50 == game.score
+            ghost_nearby = nearest_ghost_distance(game.pacman, game.ghosts) < 150 ** 2
+            ghost_edible = any(ghost.mode.current is FREIGHT for ghost in game.ghosts)
+
+            if power_pellet_eaten and not ghost_nearby:
+                reward -= 300
+
+            if power_pellet_eaten and ghost_nearby:
+                reward += 100
+
+            if ghost_edible and curr_ghost_distance < prev_ghost_distance:
+                reward += 100
 
             if game.lives < prev_lives:
                 reward -= 500
