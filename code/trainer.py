@@ -37,7 +37,7 @@ agent = Agent(
     epsilon = 0.65,     # exploration rate (random percentage to take a random action)
     alpha   = 0.1,      # learning rate (how fast it learns and nudges the q-value)
     gamma   = 0.9,      # discount factor (higher = values future rewards | lower = values immediate rewards)
-    nu      = 25       # number of iterations
+    nu      = 100       # number of iterations
 )
 agent.load()
 
@@ -55,7 +55,7 @@ if TRAINING:
         #agent.epsilon = max(agent.epsilon, 0.2)
         agent.epsilon = max(0.01, agent.epsilon * 0.995)
         print(f"======== Iteration {agent.total_iterations} ========")
-        print(f"* Agent Epsilon: {agent.epsilon}")
+        print(f"* Agent Epsilon: {agent.epsilon:.4f}")
 
         state = get_state(game.pacman, game.ghosts, game.pellets)
         action = agent.get_action(state, [LEFT, RIGHT])
