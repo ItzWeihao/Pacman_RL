@@ -2,6 +2,7 @@
 import random
 from collections import defaultdict
 
+# the agent playing pacman
 class Agent:
     def __init__(self, name, epsilon, alpha, gamma, nu):
         self.name = name
@@ -12,17 +13,20 @@ class Agent:
         self.Q = defaultdict(float)
         self.total_iterations = 0
 
+    # based on epsilon it'll choose a random action or the best action based on Q-value
     def get_action(self, state, valid_actions):
         if random.random() < self.epsilon:
             return random.choice(valid_actions)
         return max(valid_actions, key=lambda a: self.Q[(state, a)])
 
+    # updating q-value
     def update(self, state, action, reward, next_state, valid_next_actions):
         max_q_next = max(self.Q[(next_state, a)] for a in valid_next_actions)
         self.Q[(state, action)] += self.alpha * (
             reward + self.gamma * max_q_next - self.Q[(state, action)]
         )
 
+    # saves the qtable
     def save(self, path="pacman_qtable"):
         data = {
             "Q": dict(self.Q),
@@ -32,6 +36,7 @@ class Agent:
         with open(path, "wb") as f:
             pickle.dump(data, f)
 
+    # loads the qtable
     def load(self, path="pacman_qtable"):
         try:
             with open(path, "rb") as f:

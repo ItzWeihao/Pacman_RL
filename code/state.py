@@ -45,6 +45,7 @@ def get_state(pacman, ghosts, pellets):
 
     ghost_edible = any(ghost.mode.current is FREIGHT for ghost in ghosts)
 
+    # the knowledge given to the agent
     return (
         pacman_node,
         pacman_direction,

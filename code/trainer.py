@@ -8,9 +8,7 @@ TRAINING = True
 RENDER = True
 TOTAL_REWARD_GAIN = 0
 
-# 2300 iterations; -702,56 avg rewards
-# 2400 iterations; -688.52 avg rewards
-
+# Get closest pellet
 def nearest_pellet_distance(pacman, pellets):
     if not pellets.pelletList:
         return 0
@@ -19,6 +17,7 @@ def nearest_pellet_distance(pacman, pellets):
         for p in pellets.pelletList
     )
 
+# Get closest ghost
 def nearest_ghost_distance(pacman, ghosts):
     dangerous_ghosts = [g for g in ghosts if g.mode.current is not FREIGHT]
     if not dangerous_ghosts:
@@ -28,10 +27,7 @@ def nearest_ghost_distance(pacman, ghosts):
         for ghost in dangerous_ghosts
     )
 
-def near_node(pacman, threshold=5):
-    diff = pacman.position - pacman.target.position
-    return diff.magnitudeSquared() < threshold**2
-
+# Defining Agent
 agent = Agent(
     name    = "Pacman",
     epsilon = 0.65,     # exploration rate (random percentage to take a random action)
@@ -49,10 +45,7 @@ if TRAINING:
     for episode in range(agent.nu):
         agent.total_iterations += 1
 
-        #if agent.total_iterations % 500 == 0:
-        #    agent.epsilon = 0.65
-
-        #agent.epsilon = max(agent.epsilon, 0.2)
+        # exploration goes down for each iteration
         agent.epsilon = max(0.01, agent.epsilon * 0.995)
         print(f"======== Iteration {agent.total_iterations} ========")
         print(f"* Agent Epsilon: {agent.epsilon:.4f}")
@@ -65,6 +58,7 @@ if TRAINING:
         total_reward = 0
 
         while not game.over:
+            # keeps track of previous attributes to track reward
             prev_score = game.score
             prev_lives = game.lives
             prev_level = game.level
@@ -73,39 +67,50 @@ if TRAINING:
 
             game.update()
 
+            # reward based on difference in score
             reward = game.score - prev_score
 
+            # the nearest pellet and ghost
             curr_pellet_distance = nearest_pellet_distance(game.pacman, game.pellets)
             curr_ghost_distance = nearest_ghost_distance(game.pacman, game.ghosts)
 
+            # figure out if ghost is edible and nearby and if power pellet are eaten
             power_pellet_eaten = prev_score + 50 == game.score
             ghost_nearby = nearest_ghost_distance(game.pacman, game.ghosts) < 150 ** 2
             ghost_edible = any(ghost.mode.current is FREIGHT for ghost in game.ghosts)
 
+            # penalty for eating a PP when no ghosts are nearby
             if power_pellet_eaten and not ghost_nearby:
                 reward -= 300
 
+            # reward for eating a PP when ghosts are nearby
             if power_pellet_eaten and ghost_nearby:
                 reward += 100
 
+            # extra reward for eating ghosts
             if ghost_edible and curr_ghost_distance < prev_ghost_distance:
                 reward += 100
 
+            # penalty for dying
             if game.lives < prev_lives:
                 reward -= 500
 
+            # huge reward for going to the next level
             if game.level != prev_level:
                 reward += 1000
 
+            # penalty for going closer to a ghost
             if curr_ghost_distance < prev_ghost_distance:
                 reward -= 50
 
+            # reward for going closer to pellets
             if curr_pellet_distance < prev_pellet_distance:
                 reward += 5
 
             next_state = get_state(game.pacman, game.ghosts, game.pellets)
             next_action = agent.get_action(next_state, game.pacman.validDirections())
 
+            # figure out pacman controls based on node
             if game.pacman.overshotTarget():
                 game.pacman.node = game.pacman.target
 
